@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "celeritas"
+version = "0.1.0"
+description = "A simple containerized speedtest utility."
+authors = ["Darya <darya@example.com>"]
+readme = "README.md"
+packages = [{include = "celeritas", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "*"
+pydantic-settings = "*"
+loguru = "*"
+fastapi = "*"
+typer = "*"
+polars = "*"
+uvicorn = "*"
+speedtest-cli = "*"
+ping3 = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-cov = "*"
+mypy = "*"
+ruff = "*"
+mkdocs = "*"
+httpx = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88

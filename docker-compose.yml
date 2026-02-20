@@ -1,0 +1,11 @@
+services:
+  celeritas:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - CELERITAS_DB_PATH=/app/data/celeritas.db
+      - CELERITAS_PORT=8000
+    restart: unless-stopped

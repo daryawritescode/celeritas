@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celeritas Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="glass-container main-wrapper">
+        <header>
+            <div class="logo">
+                <h1>Celeritas</h1>
+                <div class="pulse-ring" id="status-ring"></div>
+            </div>
+            <button id="runTestBtn" class="btn-primary">Run Test</button>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Download</h3>
+                <div class="value" id="val-download">-- <span>Mbps</span></div>
+            </div>
+            <div class="stat-card">
+                <h3>Upload</h3>
+                <div class="value" id="val-upload">-- <span>Mbps</span></div>
+            </div>
+            <div class="stat-card">
+                <h3>Ping</h3>
+                <div class="value" id="val-ping">-- <span>ms</span></div>
+            </div>
+            <div class="stat-card">
+                <h3>Gateway / DNS</h3>
+                <div class="value" id="val-network">-- <span>/</span> -- <span>ms</span></div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="historyChart"></canvas>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
