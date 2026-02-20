@@ -11,18 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-    - name: Install Poetry
-      run: curl -sSL https://install.python-poetry.org | python3 -
-    - name: Install Dependencies
-      run: poetry install
+    - name: Build Dev Container
+      run: make build-dev
     - name: Run Linters
-      run: |
-        poetry run ruff check src tests
-        poetry run mypy src tests
+      run: make lint
     - name: Run Tests
-      # Assuming running tests might require network access which is fine in GitHub Actions
-      run: poetry run pytest --cov=src --cov-report=term-missing
+      run: make test

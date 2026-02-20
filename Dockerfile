@@ -19,11 +19,13 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 
 WORKDIR /app
 COPY pyproject.toml poetry.lock* ./
-RUN poetry install --no-root --without dev
+ARG INSTALL_DEV=false
+RUN if [ "$INSTALL_DEV" = "true" ]; then poetry install --no-root; else poetry install --no-root --without dev; fi
 
 COPY src/ ./src/
+COPY tests/ ./tests/
 COPY README.md ./
-RUN poetry install --without dev
+RUN if [ "$INSTALL_DEV" = "true" ]; then poetry install; else poetry install --without dev; fi
 
 # We run as root in this simple container so ping3 can craft raw sockets properly
 EXPOSE 8000

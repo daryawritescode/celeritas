@@ -1,23 +1,23 @@
-.PHONY: install lint test build run serve compose-up compose-down
+.PHONY: build-dev lint test build run serve compose-up compose-down
 
-install:
-	poetry install
+build-dev:
+	docker build --build-arg INSTALL_DEV=true -t celeritas:dev .
 
-lint:
-	poetry run ruff check .
-	poetry run mypy src tests
+lint: build-dev
+	docker run --rm celeritas:dev poetry run ruff check .
+	docker run --rm celeritas:dev poetry run mypy src tests
 
-test:
-	poetry run pytest --cov=src --cov-report=term-missing
+test: build-dev
+	docker run --rm celeritas:dev poetry run pytest --cov=src --cov-report=term-missing
 
 build:
-	docker build -t celeritas .
+	docker build -t celeritas:latest .
 
-run:
-	poetry run python -m celeritas.cli.app run
+run: build
+	docker run --rm --network host celeritas:latest poetry run python -m celeritas.cli.app run
 
-serve:
-	poetry run python -m celeritas.cli.app serve
+serve: build
+	docker run --rm -p 8000:8000 celeritas:latest poetry run python -m celeritas.cli.app serve
 
 compose-up:
 	docker compose up -d
