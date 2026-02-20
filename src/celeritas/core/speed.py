@@ -3,7 +3,7 @@ from loguru import logger
 
 def run_speedtest() -> tuple[float, float, float]:
     logger.info("Starting speedtest (this may take a minute)...")
-    st = speedtest.Speedtest()
+    st = speedtest.Speedtest(secure=True)
     st.get_best_server()
     download = st.download() / 1_000_000  # Convert to Mbps
     upload = st.upload() / 1_000_000      # Convert to Mbps

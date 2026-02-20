@@ -46,6 +46,8 @@ def get_tailscale_ip() -> str | None:
         lines = output.strip().split("\n")
         if lines:
             return lines[0].strip()
+    except FileNotFoundError:
+        logger.warning("Tailscale executable not found in this environment. Skipping.")
     except Exception as e:
         logger.warning(f"Failed to get tailscale IP: {e}")
     return None

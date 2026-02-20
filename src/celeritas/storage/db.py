@@ -31,6 +31,7 @@ def get_db_connection():
         conn.close()
 
 def save_result(result: CombinedResult) -> int:
+    init_db()
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
