@@ -16,7 +16,10 @@ def init_db() -> None:
                 speedtest_ping_ms REAL,
                 gateway_ping_ms REAL,
                 dns_ping_ms REAL,
-                tailscale_ping_ms REAL
+                public_ip TEXT,
+                container_ip TEXT,
+                host_ip TEXT,
+                location TEXT
             )
         ''')
         conn.commit()
@@ -37,8 +40,8 @@ def save_result(result: CombinedResult) -> int:
         cursor.execute('''
             INSERT INTO test_results (
                 timestamp, download_mbps, upload_mbps, speedtest_ping_ms,
-                gateway_ping_ms, dns_ping_ms, tailscale_ping_ms
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                gateway_ping_ms, dns_ping_ms, public_ip, container_ip, host_ip, location
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             result.timestamp.isoformat(),
             result.download_mbps,
@@ -46,7 +49,10 @@ def save_result(result: CombinedResult) -> int:
             result.speedtest_ping_ms,
             result.gateway_ping_ms,
             result.dns_ping_ms,
-            result.tailscale_ping_ms
+            result.public_ip,
+            result.container_ip,
+            result.host_ip,
+            result.location
         ))
         conn.commit()
         if cursor.lastrowid:

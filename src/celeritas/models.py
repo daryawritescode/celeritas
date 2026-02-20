@@ -9,4 +9,7 @@ class CombinedResult(BaseModel):
     speedtest_ping_ms: float | None = None
     gateway_ping_ms: float | None = None
     dns_ping_ms: float | None = None
-    tailscale_ping_ms: float | None = None
+    public_ip: str | None = None
+    container_ip: str | None = None
+    host_ip: str | None = None
+    location: str | None = None

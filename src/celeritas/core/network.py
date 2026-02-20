@@ -1,6 +1,7 @@
 import socket
 import struct
-import subprocess
+import urllib.request
+import json
 from ping3 import ping
 from loguru import logger
 
@@ -40,19 +41,35 @@ def get_dns_servers() -> list[str]:
         logger.warning(f"Could not read DNS servers: {e}")
     return servers
 
-def get_tailscale_ip() -> str | None:
+def get_ip_info() -> dict:
+    info = {
+        "container_ip": None,
+        "host_ip": get_default_gateway_linux(),
+        "public_ip": None,
+        "location": None
+    }
+    
     try:
-        output = subprocess.check_output(["tailscale", "ip", "-4"], text=True, timeout=2)
-        lines = output.strip().split("\n")
-        if lines:
-            return lines[0].strip()
-    except FileNotFoundError:
-        logger.warning("Tailscale executable not found in this environment. Skipping.")
+        info["container_ip"] = socket.gethostbyname(socket.gethostname())
     except Exception as e:
-        logger.warning(f"Failed to get tailscale IP: {e}")
-    return None
+        logger.warning(f"Could not get container IP: {e}")
+        
+    try:
+        req = urllib.request.Request("https://ipinfo.io/json", headers={'User-Agent': 'curl/7.68.0'})
+        with urllib.request.urlopen(req, timeout=2) as response:
+            data = json.loads(response.read().decode())
+            info["public_ip"] = data.get("ip")
+            loc = [data.get("city"), data.get("region"), data.get("country")]
+            loc = [x for x in loc if x]
+            if loc:
+                info["location"] = ", ".join(loc)
+    except Exception as e:
+        logger.warning(f"Failed to get public IP info: {e}")
+        
+    return info
 
-def run_network_metrics() -> tuple[float | None, float | None, float | None]:
+
+def run_network_metrics() -> tuple[float | None, float | None, dict]:
     gateway = get_default_gateway_linux()
     gateway_ping = None
     if gateway:
@@ -67,10 +84,6 @@ def run_network_metrics() -> tuple[float | None, float | None, float | None]:
         logger.info(f"Pinging DNS server {dns_server}")
         dns_ping = measure_latency(dns_server)
         
-    ts_ip = get_tailscale_ip()
-    ts_ping = None
-    if ts_ip:
-        logger.info(f"Pinging Tailscale IP {ts_ip}")
-        ts_ping = measure_latency(ts_ip)
+    ip_info = get_ip_info()
     
-    return gateway_ping, dns_ping, ts_ping
+    return gateway_ping, dns_ping, ip_info

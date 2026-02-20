@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <div class="glass-container main-wrapper">
         <header>
@@ -36,6 +38,24 @@
                 <div class="value" id="val-network">-- <span>/</span> -- <span>ms</span></div>
             </div>
         </div>
+        <div class="telemetry-panel">
+            <div class="telemetry-item">
+                <span class="label">Public IP</span>
+                <span class="value" id="val-public-ip">--</span>
+            </div>
+            <div class="telemetry-item">
+                <span class="label">Location</span>
+                <span class="value" id="val-location">--</span>
+            </div>
+            <div class="telemetry-item">
+                <span class="label">Container IP</span>
+                <span class="value" id="val-container-ip">--</span>
+            </div>
+            <div class="telemetry-item">
+                <span class="label">Host IP</span>
+                <span class="value" id="val-host-ip">--</span>
+            </div>
+        </div>
 
         <div class="chart-container">
             <canvas id="historyChart"></canvas>
@@ -43,4 +63,5 @@
     </div>
     <script src="/static/script.js"></script>
 </body>
+
 </html>

@@ -21,6 +21,14 @@ def run():
         typer.echo(f"Gateway Ping: {result.gateway_ping_ms:.2f} ms")
     if result.dns_ping_ms:
         typer.echo(f"DNS (1.1.1.1) Ping: {result.dns_ping_ms:.2f} ms")
+    if result.public_ip:
+        typer.echo(f"Public IP: {result.public_ip}")
+    if result.location:
+        typer.echo(f"Location: {result.location}")
+    if result.container_ip:
+        typer.echo(f"Container IP: {result.container_ip}")
+    if result.host_ip:
+        typer.echo(f"Host IP: {result.host_ip}")
 
 @app.command()
 def serve(host: str = "0.0.0.0", port: int = settings.celeritas_port):

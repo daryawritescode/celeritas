@@ -14,7 +14,7 @@ def run_all_tests() -> CombinedResult:
     except Exception as e:
         logger.error(f"Speedtest failed: {e}")
 
-    gw_ping, dns_ping, ts_ping = run_network_metrics()
+    gw_ping, dns_ping, ip_info = run_network_metrics()
 
     result = CombinedResult(
         timestamp=datetime.now(timezone.utc),
@@ -23,7 +23,10 @@ def run_all_tests() -> CombinedResult:
         speedtest_ping_ms=sp_ping,
         gateway_ping_ms=gw_ping,
         dns_ping_ms=dns_ping,
-        tailscale_ping_ms=ts_ping
+        public_ip=ip_info.get("public_ip"),
+        container_ip=ip_info.get("container_ip"),
+        host_ip=ip_info.get("host_ip"),
+        location=ip_info.get("location")
     )
     
     try:

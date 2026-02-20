@@ -30,7 +30,10 @@ def test_save_and_fetch():
         speedtest_ping_ms=10.0,
         gateway_ping_ms=1.5,
         dns_ping_ms=12.3,
-        tailscale_ping_ms=45.6
+        public_ip="1.2.3.4",
+        container_ip="172.17.0.2",
+        host_ip="172.17.0.1",
+        location="Seattle, WA, US"
     )
     
     row_id = save_result(result)

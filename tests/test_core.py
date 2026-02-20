@@ -5,7 +5,7 @@ from celeritas.core.network import (
     measure_latency,
     run_network_metrics,
     get_dns_servers,
-    get_tailscale_ip,
+    get_ip_info,
 )
 from celeritas.core.runner import run_all_tests
 
@@ -56,17 +56,20 @@ def test_get_dns_servers_exception():
         servers = get_dns_servers()
         assert servers == []
 
-@patch("subprocess.check_output")
-def test_get_tailscale_ip(mock_subp):
-    mock_subp.return_value = "100.84.197.4\n10.0.0.1\n"
-    ip = get_tailscale_ip()
-    assert ip == "100.84.197.4"
-
-@patch("subprocess.check_output")
-def test_get_tailscale_ip_fails(mock_subp):
-    mock_subp.side_effect = Exception("No tailscale")
-    ip = get_tailscale_ip()
-    assert ip is None
+@patch("urllib.request.urlopen")
+def test_get_ip_info(mock_urlopen):
+    mock_response = MagicMock()
+    mock_response.read.return_value = b'{"ip": "8.8.8.8", "city": "Seattle", "region": "Washington", "country": "US"}'
+    mock_response.__enter__.return_value = mock_response
+    mock_urlopen.return_value = mock_response
+    
+    with patch("celeritas.core.network.socket.gethostbyname", return_value="172.17.0.2"):
+        with patch("celeritas.core.network.get_default_gateway_linux", return_value="172.17.0.1"):
+            info = get_ip_info()
+            assert info["public_ip"] == "8.8.8.8"
+            assert info["location"] == "Seattle, Washington, US"
+            assert info["container_ip"] == "172.17.0.2"
+            assert info["host_ip"] == "172.17.0.1"
 
 @patch("celeritas.core.network.ping")
 def test_measure_latency(mock_ping):
@@ -83,31 +86,30 @@ def test_measure_latency_fails(mock_ping):
 
 @patch("celeritas.core.network.get_default_gateway_linux")
 @patch("celeritas.core.network.get_dns_servers")
-@patch("celeritas.core.network.get_tailscale_ip")
+@patch("celeritas.core.network.get_ip_info")
 @patch("celeritas.core.network.measure_latency")
-def test_run_network_metrics(mock_lat, mock_ts, mock_dns, mock_gw):
+def test_run_network_metrics(mock_lat, mock_ip, mock_dns, mock_gw):
     mock_gw.return_value = "192.168.1.1"
     mock_dns.return_value = ["8.8.8.8"]
-    mock_ts.return_value = "100.100.100.1"
+    mock_ip.return_value = {"public_ip": "1.1.1.1"}
     
-    mock_lat.side_effect = [1.5, 12.0, 45.0]
+    mock_lat.side_effect = [1.5, 12.0]
     
-    gw, dns, ts = run_network_metrics()
+    gw, dns, ip_info = run_network_metrics()
     assert gw == 1.5
     assert dns == 12.0
-    assert ts == 45.0
+    assert ip_info["public_ip"] == "1.1.1.1"
     
     # Check calls
     assert mock_lat.call_args_list[0][0][0] == "192.168.1.1"
     assert mock_lat.call_args_list[1][0][0] == "8.8.8.8"
-    assert mock_lat.call_args_list[2][0][0] == "100.100.100.1"
 
 @patch("celeritas.core.runner.run_speedtest")
 @patch("celeritas.core.runner.run_network_metrics")
 @patch("celeritas.core.runner.save_result")
 def test_run_all_tests(mock_save, mock_net, mock_speed):
     mock_speed.return_value = (100.0, 50.0, 15.0)
-    mock_net.return_value = (1.5, 12.0, 45.0)
+    mock_net.return_value = (1.5, 12.0, {"public_ip": "8.8.8.8"})
     
     res = run_all_tests()
     assert res.download_mbps == 100.0
@@ -118,7 +120,7 @@ def test_run_all_tests(mock_save, mock_net, mock_speed):
 @patch("celeritas.core.runner.save_result")
 def test_run_all_tests_with_speedtest_error(mock_save, mock_net, mock_speed):
     mock_speed.side_effect = Exception("Fail")
-    mock_net.return_value = (1.5, 12.0, 45.0)
+    mock_net.return_value = (1.5, 12.0, {"public_ip": "8.8.8.8"})
     mock_save.side_effect = Exception("DB Fail")
     
     res = run_all_tests()
