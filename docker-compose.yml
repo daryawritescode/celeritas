@@ -1,6 +1,9 @@
 services:
   celeritas:
-    build: .
+    build:
+      context: .
+      args:
+        INSTALL_DEV: "false"
     ports:
       - "8000:8000"
     volumes:
@@ -9,3 +12,14 @@ services:
       - CELERITAS_DB_PATH=/app/data/celeritas.db
       - CELERITAS_PORT=8000
     restart: unless-stopped
+
+  dev:
+    build:
+      context: .
+      args:
+        INSTALL_DEV: "true"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - CELERITAS_DB_PATH=/app/data/celeritas.db
+      - CELERITAS_PORT=8000
