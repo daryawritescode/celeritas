@@ -1,5 +1,8 @@
 import typer
 import uvicorn
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
 from celeritas.core.runner import run_all_tests
 from celeritas.config import settings
 
@@ -8,27 +11,41 @@ app = typer.Typer(help="Celeritas Speedtest & Network Utility")
 @app.command()
 def run():
     """Run a speedtest and network latency check"""
-    typer.echo("Starting tests...")
+    console = Console()
+    console.print("[bold cyan]Starting tests...[/bold cyan]")
     result = run_all_tests()
-    typer.echo("\n--- Results ---")
+    
+    table = Table(show_header=False, box=None)
+    table.add_column("Metric", style="bold magenta", justify="right")
+    table.add_column("Value", style="cyan")
+    
     if result.speedtest_ping_ms:
-        typer.echo(f"Ping: {result.speedtest_ping_ms} ms")
+        table.add_row("📍 Ping", f"[bold white]{result.speedtest_ping_ms:.2f} ms[/]")
     if result.download_mbps:
-        typer.echo(f"Download: {result.download_mbps:.2f} Mbps")
+        table.add_row("⬇️  Download", f"[bold green]{result.download_mbps:.2f} Mbps[/]")
     if result.upload_mbps:
-        typer.echo(f"Upload: {result.upload_mbps:.2f} Mbps")
+        table.add_row("⬆️  Upload", f"[bold green]{result.upload_mbps:.2f} Mbps[/]")
+        
+    table.add_row("", "")
+    
     if result.gateway_ping_ms:
-        typer.echo(f"Gateway Ping: {result.gateway_ping_ms:.2f} ms")
+        table.add_row("🖥️  Gateway Ping", f"[bold white]{result.gateway_ping_ms:.2f} ms[/]")
     if result.dns_ping_ms:
-        typer.echo(f"DNS (1.1.1.1) Ping: {result.dns_ping_ms:.2f} ms")
+        table.add_row("🌍 DNS Ping", f"[bold white]{result.dns_ping_ms:.2f} ms[/]")
+        
+    table.add_row("", "")
+        
     if result.public_ip:
-        typer.echo(f"Public IP: {result.public_ip}")
+        table.add_row("🌐 Public IP", f"[bold yellow]{result.public_ip}[/]")
     if result.location:
-        typer.echo(f"Location: {result.location}")
+        table.add_row("🗺️  Location", f"[bold yellow]{result.location}[/]")
     if result.container_ip:
-        typer.echo(f"Container IP: {result.container_ip}")
+        table.add_row("📦 Container IP", f"[bold yellow]{result.container_ip}[/]")
     if result.host_ip:
-        typer.echo(f"Host IP: {result.host_ip}")
+        table.add_row("🏠 Host IP", f"[bold yellow]{result.host_ip}[/]")
+
+    console.print("\n")
+    console.print(Panel(table, title="[bold blue]🏎️  Celeritas Results[/]", border_style="blue", expand=False))
 
 @app.command()
 def serve(host: str = "0.0.0.0", port: int = settings.celeritas_port):
