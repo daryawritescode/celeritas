@@ -25,8 +25,8 @@ function updateDashboard(data) {
     document.getElementById('val-upload').innerHTML = `${latest.upload_mbps ? latest.upload_mbps.toFixed(1) : '--'} <span>Mbps</span>`;
     document.getElementById('val-ping').innerHTML = `${latest.speedtest_ping_ms ? latest.speedtest_ping_ms.toFixed(0) : '--'} <span>ms</span>`;
 
-    const gwPing = latest.gateway_ping_ms ? latest.gateway_ping_ms.toFixed(0) : '--';
-    const dnsPing = latest.dns_ping_ms ? latest.dns_ping_ms.toFixed(0) : '--';
+    const gwPing = latest.gateway_ping_ms ? latest.gateway_ping_ms.toFixed(2) : '--';
+    const dnsPing = latest.dns_ping_ms ? latest.dns_ping_ms.toFixed(2) : '--';
     document.getElementById('val-network').innerHTML = `${gwPing} <span>/</span> ${dnsPing} <span>ms</span>`;
 
     document.getElementById('val-public-ip').innerText = latest.public_ip || '--';

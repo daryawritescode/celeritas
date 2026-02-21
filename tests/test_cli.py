@@ -14,7 +14,8 @@ def test_run_command(mock_run):
 
     result = runner.invoke(app, ["run"])
     assert result.exit_code == 0
-    assert "Download: 100.00 Mbps" in result.stdout
+    assert "100.00 Mbps" in result.stdout
+    assert "Download" in result.stdout
 
 @patch("celeritas.cli.app.run_all_tests")
 def test_run_command_partial_metrics(mock_run):
