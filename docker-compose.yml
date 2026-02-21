@@ -4,8 +4,14 @@ services:
       context: .
       args:
         INSTALL_DEV: "false"
-    ports:
-      - "8000:8000"
+    ports: []
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.celeritas.rule=Host(`celeritas.localhost`)"
+      - "traefik.http.routers.celeritas.entrypoints=web"
+      - "traefik.http.services.celeritas.loadbalancer.server.port=8000"
     volumes:
       - ./data:/app/data
     environment:
@@ -23,3 +29,8 @@ services:
     environment:
       - CELERITAS_DB_PATH=/app/data/celeritas.db
       - CELERITAS_PORT=8000
+
+networks:
+  proxy:
+    name: atriensis_default
+    external: true

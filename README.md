@@ -25,6 +25,8 @@ make serve
 
 ## Docker Compose Build
 
+Start the container and the application will be routed automatically through Traefik at [http://celeritas.localhost](http://celeritas.localhost).
+
 ```bash
 docker compose up -d
 ```
