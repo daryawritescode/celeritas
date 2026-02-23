@@ -1,5 +1,6 @@
 import typer
 import uvicorn
+import time
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -48,10 +49,36 @@ def run():
     console.print(Panel(table, title="[bold blue]🏎️  Celeritas Results[/]", border_style="blue", expand=False))
 
 @app.command()
+def docs():
+    """Print the documentation URL"""
+    typer.echo("Integrated Documentation is available at: http://celeritas.localhost/docs/")
+
+@app.command()
+def schedule(
+    interval: int = typer.Option(None, help="Interval in minutes (overrides CELERITAS_SCHEDULE_INTERVAL)"),
+    once: bool = False
+):
+    """Run tests on a schedule"""
+    # Priority: CLI argument > Environment Variable > Default (handled by Settings)
+    run_interval = interval if interval is not None else settings.celeritas_schedule_interval
+    
+    typer.echo(f"Starting scheduler: Running every {run_interval} minutes.")
+    while True:
+        try:
+            run_all_tests()
+        except Exception as e:
+            typer.echo(f"Scheduled test failed: {e}", err=True)
+        
+        if once:
+            break
+            
+        time.sleep(run_interval * 60)
+
+@app.command()
 def serve(host: str = "0.0.0.0", port: int = settings.celeritas_port):
     """Start the Celeritas Web Dashboard"""
     typer.echo(f"Starting server on {host}:{port}")
     uvicorn.run("celeritas.server.app:api", host=host, port=port, reload=False)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app()

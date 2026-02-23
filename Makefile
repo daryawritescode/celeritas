@@ -1,26 +1,41 @@
-.PHONY: build-dev lint test build run serve compose-up compose-down
+.PHONY: build up down lint test run serve help
 
-build-dev:
-	docker compose build dev
+DC = docker compose
 
-lint: build-dev
-	docker compose run --rm dev poetry run ruff check .
-	docker compose run --rm dev poetry run mypy src tests
-
-test: build-dev
-	docker compose run --rm dev poetry run pytest --cov=src --cov-report=term-missing
+help:
+	@echo "Available targets:"
+	@echo "  run        Execute a single speedtest run"
+	@echo "  serve      Start the web dashboard"
+	@echo ""
+	@echo "Utility targets:"
+	@echo "  build      Build container images"
+	@echo "  up         Start application in background"
+	@echo "  down       Stop all services"
+	@echo "  lint       Run linting (ruff, mypy)"
+	@echo "  test       Run tests with 100% coverage"
+	@echo "  docs       Preview documentation locally"
 
 build:
-	docker compose build celeritas
+	$(DC) build
 
-run: build
-	docker compose run --rm celeritas poetry run python -m celeritas.cli.app run
+up:
+	$(DC) up -d
 
-serve: build
-	docker compose run --rm --service-ports celeritas poetry run python -m celeritas.cli.app serve
+down:
+	$(DC) down
 
-compose-up:
-	docker compose up -d celeritas
+lint:
+	$(DC) run --rm dev poetry run ruff check .
+	$(DC) run --rm dev poetry run mypy src tests
 
-compose-down:
-	docker compose down
+test:
+	$(DC) run --rm dev poetry run pytest --cov=src --cov-report=term-missing
+
+run:
+	$(DC) run --rm celeritas poetry run celeritas run
+
+docs:
+	$(DC) run --rm dev poetry run mkdocs serve -a 0.0.0.0:8000
+
+serve:
+	$(DC) up celeritas

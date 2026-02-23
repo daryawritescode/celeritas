@@ -126,3 +126,12 @@ def test_run_all_tests_with_speedtest_error(mock_save, mock_net, mock_speed):
     res = run_all_tests()
     assert res.download_mbps is None
     assert res.gateway_ping_ms == 1.5
+
+@patch("urllib.request.urlopen")
+def test_get_ip_info_exceptions(mock_urlopen):
+    with patch("celeritas.core.network.socket.gethostbyname", side_effect=Exception("socket error")):
+        with patch("celeritas.core.network.get_default_gateway_linux", return_value=None):
+            mock_urlopen.side_effect = Exception("url error")
+            info = get_ip_info()
+            assert info["container_ip"] is None
+            assert info["public_ip"] is None

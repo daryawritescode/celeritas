@@ -13,3 +13,11 @@ class CombinedResult(BaseModel):
     container_ip: str | None = None
     host_ip: str | None = None
     location: str | None = None
+
+class TestState(BaseModel):
+    is_running: bool = False
+    progress: int = 0  # 0-100
+    current_download: float | None = None
+    current_upload: float | None = None
+    current_ping: float | None = None
+    message: str = "Idle"
