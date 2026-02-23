@@ -9,7 +9,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.celeritas.rule=Host(`celeritas.localhost`)"
+      - "traefik.http.routers.celeritas.rule=Host(`celeritas.luceris`)"
       - "traefik.http.routers.celeritas.entrypoints=web"
       - "traefik.http.services.celeritas.loadbalancer.server.port=80"
     volumes:
