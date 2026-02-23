@@ -2,34 +2,35 @@
 name = "celeritas"
 version = "0.1.0"
 description = "A simple containerized speedtest utility."
-authors = ["Darya <darya@example.com>"]
+authors = ["Darya Lebedeva <daryawritescode@gmail.com>"]
+license = "MIT"
 readme = "README.md"
 packages = [{include = "celeritas", from = "src"}]
- 
+
 [tool.poetry.scripts]
 celeritas = "celeritas.cli.app:app"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic = "*"
-pydantic-settings = "*"
-loguru = "*"
-fastapi = "*"
-typer = "*"
-polars = "*"
-uvicorn = "*"
-speedtest-cli = "*"
-ping3 = "*"
+pydantic = "^2.12.5"
+pydantic-settings = "^2.13.1"
+loguru = "^0.7.3"
+fastapi = "^0.129.0"
+typer = "^0.24.0"
+polars = "^1.38.1"
+uvicorn = "^0.41.0"
+speedtest-cli = "^2.1.3"
+ping3 = "^5.1.5"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
-pytest-cov = "*"
-mypy = "*"
-ruff = "*"
-mkdocs = "*"
-mkdocs-material = "*"
-mkdocstrings = {extras = ["python"], version = "*"}
-httpx = "*"
+pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
+mypy = "^1.19.1"
+ruff = "^0.15.2"
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.7.2"
+mkdocstrings = {extras = ["python"], version = "^1.0.3"}
+httpx = "^0.28.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -41,8 +42,13 @@ testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.11"
-strict = false
-ignore_missing_imports = true
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
 
 [tool.ruff]
 line-length = 88

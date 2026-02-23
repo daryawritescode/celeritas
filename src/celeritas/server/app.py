@@ -19,22 +19,26 @@ DOCS_DIR = os.path.join(os.getcwd(), "site")
 if os.path.exists(DOCS_DIR):
     api.mount("/docs", StaticFiles(directory=DOCS_DIR, html=True), name="docs")
 
+
 @api.get("/")
-def read_root():
+def read_root() -> FileResponse:
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
+
 @api.get("/api/results", response_model=list[CombinedResult])
-def get_results():
+def get_results() -> list[CombinedResult]:
     """Fetch all historical test results"""
     return fetch_all_results()
 
+
 @api.get("/api/state", response_model=TestState)
-def get_state():
+def get_state() -> TestState:
     """Fetch current test progress state"""
     return current_state
 
+
 @api.post("/api/run")
-def trigger_run(background_tasks: BackgroundTasks):
+def trigger_run(background_tasks: BackgroundTasks) -> dict[str, str]:
     """Trigger a new speedtest asynchronously"""
     background_tasks.add_task(run_all_tests)
     return {"status": "Test started in background."}

@@ -6,22 +6,22 @@ from celeritas.models import CombinedResult
 from celeritas.storage.db import save_result
 from celeritas.core.state import current_state
 
+
 def run_all_tests() -> CombinedResult:
     logger.info("Running all network and speed tests.")
-    
+
     current_state.is_running = True
     current_state.progress = 10
     current_state.message = "Initializing speedtest..."
-    
-    dl, ul, sp_ping = None, None, None
+
+    dl: float | None = None
+    ul: float | None = None
+    sp_ping: float | None = None
     try:
-        # We could enhance run_speedtest to provide progress, 
-        # but for now we'll simulate steps.
         current_state.progress = 20
         current_state.message = "Running download test..."
-        # In a real app we'd pass a callback to run_speedtest
         dl, ul, sp_ping = run_speedtest()
-        
+
         current_state.progress = 60
         current_state.message = "Download/Upload complete. Checking latency..."
         current_state.current_download = dl
@@ -45,17 +45,17 @@ def run_all_tests() -> CombinedResult:
         public_ip=ip_info.get("public_ip"),
         container_ip=ip_info.get("container_ip"),
         host_ip=ip_info.get("host_ip"),
-        location=ip_info.get("location")
+        location=ip_info.get("location"),
     )
-    
+
     try:
         save_result(result)
         logger.info("Test results saved to database.")
     except Exception as e:
         logger.error(f"Failed to save test results: {e}")
-        
+
     current_state.progress = 100
     current_state.is_running = False
     current_state.message = "Idle"
-    
+
     return result

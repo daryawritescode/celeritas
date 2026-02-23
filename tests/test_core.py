@@ -9,8 +9,9 @@ from celeritas.core.network import (
 )
 from celeritas.core.runner import run_all_tests
 
+
 @patch("celeritas.core.speed.speedtest.Speedtest")
-def test_run_speedtest(mock_speedtest_class):
+def test_run_speedtest(mock_speedtest_class: MagicMock) -> None:
     mock_st = MagicMock()
     mock_speedtest_class.return_value = mock_st
     mock_st.download.return_value = 100_000_000
@@ -22,47 +23,54 @@ def test_run_speedtest(mock_speedtest_class):
     assert ul == 50.0
     assert p == 15.0
 
-def test_get_default_gateway_linux():
+
+def test_get_default_gateway_linux() -> None:
     m_open = mock_open(read_data="Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\neth0\t00000000\t0101A8C0\t0003\n")
     with patch("builtins.open", m_open):
         gw = get_default_gateway_linux()
         assert gw == "192.168.1.1"
 
-def test_get_default_gateway_linux_no_default():
+
+def test_get_default_gateway_linux_no_default() -> None:
     m_open = mock_open(read_data="Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\neth0\t0101A8C0\t00000000\t0001\n")
     with patch("builtins.open", m_open):
         gw = get_default_gateway_linux()
         assert gw is None
 
-def test_get_default_gateway_linux_exception():
+
+def test_get_default_gateway_linux_exception() -> None:
     with patch("builtins.open", side_effect=Exception("Read error")):
         gw = get_default_gateway_linux()
         assert gw is None
 
-def test_get_dns_servers():
+
+def test_get_dns_servers() -> None:
     m_open = mock_open(read_data="nameserver 1.1.1.1\nnameserver 8.8.8.8\n")
     with patch("builtins.open", m_open):
         servers = get_dns_servers()
         assert servers == ["1.1.1.1", "8.8.8.8"]
 
-def test_get_dns_servers_empty():
+
+def test_get_dns_servers_empty() -> None:
     m_open = mock_open(read_data="options edns0\n")
     with patch("builtins.open", m_open):
         servers = get_dns_servers()
         assert servers == []
 
-def test_get_dns_servers_exception():
+
+def test_get_dns_servers_exception() -> None:
     with patch("builtins.open", side_effect=Exception("Read error")):
         servers = get_dns_servers()
         assert servers == []
 
+
 @patch("urllib.request.urlopen")
-def test_get_ip_info(mock_urlopen):
+def test_get_ip_info(mock_urlopen: MagicMock) -> None:
     mock_response = MagicMock()
     mock_response.read.return_value = b'{"ip": "8.8.8.8", "city": "Seattle", "region": "Washington", "country": "US"}'
     mock_response.__enter__.return_value = mock_response
     mock_urlopen.return_value = mock_response
-    
+
     with patch("celeritas.core.network.socket.gethostbyname", return_value="172.17.0.2"):
         with patch("celeritas.core.network.get_default_gateway_linux", return_value="172.17.0.1"):
             info = get_ip_info()
@@ -71,64 +79,70 @@ def test_get_ip_info(mock_urlopen):
             assert info["container_ip"] == "172.17.0.2"
             assert info["host_ip"] == "172.17.0.1"
 
+
 @patch("celeritas.core.network.ping")
-def test_measure_latency(mock_ping):
+def test_measure_latency(mock_ping: MagicMock) -> None:
     mock_ping.return_value = 0.015
     assert measure_latency("1.1.1.1") == 15.0
 
+
 @patch("celeritas.core.network.ping")
-def test_measure_latency_fails(mock_ping):
+def test_measure_latency_fails(mock_ping: MagicMock) -> None:
     mock_ping.return_value = None
     assert measure_latency("1.1.1.1") is None
-    
+
     mock_ping.side_effect = Exception("error")
     assert measure_latency("1.1.1.1") is None
+
 
 @patch("celeritas.core.network.get_default_gateway_linux")
 @patch("celeritas.core.network.get_dns_servers")
 @patch("celeritas.core.network.get_ip_info")
 @patch("celeritas.core.network.measure_latency")
-def test_run_network_metrics(mock_lat, mock_ip, mock_dns, mock_gw):
+def test_run_network_metrics(mock_lat: MagicMock, mock_ip: MagicMock, mock_dns: MagicMock, mock_gw: MagicMock) -> None:
     mock_gw.return_value = "192.168.1.1"
     mock_dns.return_value = ["8.8.8.8"]
     mock_ip.return_value = {"public_ip": "1.1.1.1"}
-    
+
     mock_lat.side_effect = [1.5, 12.0]
-    
+
     gw, dns, ip_info = run_network_metrics()
     assert gw == 1.5
     assert dns == 12.0
     assert ip_info["public_ip"] == "1.1.1.1"
-    
+
     # Check calls
     assert mock_lat.call_args_list[0][0][0] == "192.168.1.1"
     assert mock_lat.call_args_list[1][0][0] == "8.8.8.8"
 
+
 @patch("celeritas.core.runner.run_speedtest")
 @patch("celeritas.core.runner.run_network_metrics")
 @patch("celeritas.core.runner.save_result")
-def test_run_all_tests(mock_save, mock_net, mock_speed):
+def test_run_all_tests(mock_save: MagicMock, mock_net: MagicMock, mock_speed: MagicMock) -> None:
     mock_speed.return_value = (100.0, 50.0, 15.0)
     mock_net.return_value = (1.5, 12.0, {"public_ip": "8.8.8.8"})
-    
+
     res = run_all_tests()
     assert res.download_mbps == 100.0
     assert mock_save.called
 
+
 @patch("celeritas.core.runner.run_speedtest")
 @patch("celeritas.core.runner.run_network_metrics")
 @patch("celeritas.core.runner.save_result")
-def test_run_all_tests_with_speedtest_error(mock_save, mock_net, mock_speed):
+def test_run_all_tests_with_speedtest_error(mock_save: MagicMock, mock_net: MagicMock, mock_speed: MagicMock) -> None:
     mock_speed.side_effect = Exception("Fail")
     mock_net.return_value = (1.5, 12.0, {"public_ip": "8.8.8.8"})
     mock_save.side_effect = Exception("DB Fail")
-    
+
     res = run_all_tests()
     assert res.download_mbps is None
     assert res.gateway_ping_ms == 1.5
 
+
 @patch("urllib.request.urlopen")
-def test_get_ip_info_exceptions(mock_urlopen):
+def test_get_ip_info_exceptions(mock_urlopen: MagicMock) -> None:
     with patch("celeritas.core.network.socket.gethostbyname", side_effect=Exception("socket error")):
         with patch("celeritas.core.network.get_default_gateway_linux", return_value=None):
             mock_urlopen.side_effect = Exception("url error")
