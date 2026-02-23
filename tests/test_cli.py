@@ -35,3 +35,33 @@ def test_serve_command(mock_uvicorn: MagicMock) -> None:
     result = runner.invoke(app, ["serve", "--host", "127.0.0.1", "--port", "8080"])
     assert result.exit_code == 0
     mock_uvicorn.assert_called_once()
+
+
+def test_docs_command() -> None:
+    result = runner.invoke(app, ["docs"])
+    assert result.exit_code == 0
+    assert "celeritas.localhost/docs" in result.stdout
+
+
+@patch("celeritas.cli.app.run_all_tests")
+def test_schedule_once(mock_run: MagicMock) -> None:
+    result = runner.invoke(app, ["schedule", "--once"])
+    assert result.exit_code == 0
+    mock_run.assert_called_once()
+    assert "Starting scheduler" in result.stdout
+
+
+@patch("celeritas.cli.app.run_all_tests")
+def test_schedule_with_interval(mock_run: MagicMock) -> None:
+    result = runner.invoke(app, ["schedule", "--interval", "5", "--once"])
+    assert result.exit_code == 0
+    mock_run.assert_called_once()
+    assert "every 5 minutes" in result.stdout
+
+
+@patch("celeritas.cli.app.run_all_tests")
+def test_schedule_with_error(mock_run: MagicMock) -> None:
+    mock_run.side_effect = Exception("Network error")
+    result = runner.invoke(app, ["schedule", "--once"])
+    assert result.exit_code == 0
+    assert "Scheduled test failed" in result.output

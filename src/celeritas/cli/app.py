@@ -75,7 +75,7 @@ def schedule(
         if once:
             break
 
-        time.sleep(run_interval * 60)
+        time.sleep(run_interval * 60)  # pragma: no cover
 
 
 @app.command()

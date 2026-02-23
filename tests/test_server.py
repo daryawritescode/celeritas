@@ -24,10 +24,17 @@ def test_get_results(mock_fetch: MagicMock) -> None:
     assert response.json()[0]["download_mbps"] == 100.0
 
 
+def test_get_state() -> None:
+    response = client.get("/api/state")
+    assert response.status_code == 200
+    data = response.json()
+    assert "is_running" in data
+    assert "progress" in data
+    assert "message" in data
+
+
 @patch("celeritas.server.app.run_all_tests")
 def test_trigger_run(mock_run: MagicMock) -> None:
-    # Testing the async background task execution manually relies on starlette BackgroundTask tests
-    # We just ensure the endpoint returns the correct status.
     response = client.post("/api/run")
     assert response.status_code == 200
     assert response.json()["status"] == "Test started in background."
